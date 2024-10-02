@@ -22,6 +22,12 @@ export class DeerPipe extends plugin {
         })
     }
 
+    /**
+     * 获取某个用户的签到数据
+     * @param user_id
+     * @param day
+     * @returns {Promise<*>}
+     */
     async getSignData(user_id, day) {
         const deerData = await redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE) || {};
         return deerData[user_id][day];
