@@ -17,7 +17,7 @@ _✨ 每月🦌管签到 ✨_
 
 一个🦌管签到小插件
 
-> 源想法和代码都来自：https://github.com/SamuNatsu/nonebot-plugin-deer-pipe
+> ➡️ 源想法和代码都来自：https://github.com/SamuNatsu/nonebot-plugin-deer-pipe
 >
 > ⚠️ 注：哥们大自然的搬运工，算法也只是稍微修改下
 
