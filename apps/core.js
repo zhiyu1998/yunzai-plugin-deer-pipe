@@ -1,6 +1,6 @@
 import { REDIS_YUNZAI_DEER_PIPE } from "../constants/core.js";
 import { generateImage } from "../utils/core.js";
-import { redisExistAndGetKey, redisExistKey, redisSetKey } from "../utils/redis-util.js";
+import { redisExistAndGetKey, redisSetKey } from "../utils/redis-util.js";
 
 export class DeerPipe extends plugin {
     constructor() {
@@ -13,18 +13,28 @@ export class DeerPipe extends plugin {
                 {
                     reg: "^(🦌|鹿)$",
                     fnc: "lu",
+                },
+                {
+                    reg: "^补(🦌|鹿)[0-9]+$",
+                    fnc: "makeupLu",
                 }
             ]
         })
     }
 
+    async getSignData(user_id, day) {
+        const deerData = await redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE) || {};
+        return deerData[user_id][day];
+    }
+
     /**
      * 签到
-     * @param user_id 用户ID，QQ号一般是
-     * @param day    当天日期
+     * @param user_id   用户ID，QQ号一般是
+     * @param day       当天日期
+     * @param isMakeup  是否补签
      * @returns {Promise<Object>}
      */
-    async sign(user_id, day) {
+    async sign(user_id, day, isMakeup = false) {
         const userId = parseInt(user_id);
         const signDay = parseInt(day);
 
@@ -48,9 +58,15 @@ export class DeerPipe extends plugin {
         // 检查签到天数
         const dayKey = String(signDay);
         if (!deerData[userId][dayKey]) {
-            deerData[userId][dayKey] = 1; // 如果没有签到记录，则设置为1
+            // 如果没有签到记录，则设置为1
+            deerData[userId][dayKey] = 1;
         } else {
-            deerData[userId][dayKey] += 1; // 如果有签到记录，则加1
+            // 如果有签到记录，则检查是否补签
+            if (isMakeup) {
+                deerData[userId][dayKey] = 1; // 如果是补签，减1
+            } else {
+                deerData[userId][dayKey] += 1; // 如果有签到记录，则加1
+            }
         }
 
         // 更新 Redis 中的数据
@@ -71,5 +87,31 @@ export class DeerPipe extends plugin {
         const signData = await this.sign(user_id, day);
         const raw = await generateImage(date, nickname, signData[user_id]);
         await e.reply(segment.image(raw));
+    }
+
+    async makeupLu(e) {
+        const day = parseInt(/\d/.exec(e.msg.trim())[0]);
+        const date = new Date();
+        const nowDay = date.getDate();
+        // 如果超过日子就不理
+        if (day > nowDay) {
+            logger.info("[鹿] 超过当前日期");
+            return;
+        }
+
+        const user = e.sender;
+        const { user_id, nickname } = user;
+        // 获取用户之前的数据
+        const beforeSignData = await this.getSignData(user_id, day);
+        // 尝试签到
+        const signData = await this.sign(user_id, day, true);
+        // 补签多次情况处理
+        const raw = await generateImage(date, nickname, signData[user_id]);
+        let sendText = "成功补🦌";
+        // 如果补签后和之前的数据一致，则不允许补签
+        if (signData[user_id][day] === beforeSignData) {
+            sendText = "只能补🦌没有🦌的日子捏";
+        }
+        await e.reply([sendText, segment.image(raw)]);
     }
 }
