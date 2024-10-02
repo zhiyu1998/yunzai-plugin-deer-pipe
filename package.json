@@ -1,0 +1,8 @@
+{
+  "name": "yunzai-plugin-deer-pipe",
+  "description": "yunzai-plugin-deer-pipe，yuanzai机器人的🦌管签到",
+  "type": "module",
+  "dependencies": {
+    "canvas": "^2.11.2"
+  }
+}

@@ -1,37 +1,62 @@
+---
+updated: 2024-10-02 18:19:25
+---
+
+<div align="center">
+  <a href="https://v2.nonebot.dev/store"><img src="https://raw.githubusercontent.com/SamuNatsu/nonebot-plugin-deer-pipe/main/assets/deerpipe.jpg" width="220" height="180" alt="Logo"></a>
+</div>
+
+<div align="center">
+
 # yunzai-plugin-deer-pipe
 
-#### 介绍
-✨ 每月🦌管签到 ✨
+_✨ 每月🦌管签到 ✨_
+</div>
 
-#### 软件架构
-软件架构说明
+## 📖 介绍
 
+一个🦌管签到小插件
 
-#### 安装教程
+> 源想法和代码都来自：https://github.com/SamuNatsu/nonebot-plugin-deer-pipe
+>
+> ⚠️ 注：哥们大自然的搬运工，算法也只是稍微修改下
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## 📸 效果展示
 
-#### 使用说明
+![](./md-images/demo.webp)
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## 📔 下载插件
 
-#### 参与贡献
+1. 克隆项目
+```shell
+# 国内
+git clone https://gitee.com/kyrzy0416/yunzai-plugin-deer-pipe.git ./plugins/yunzai-plugin-deer-pipe/
+# 海外 @todo
+```
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+2. 安装依赖
+```shell
+pnpm i --filter=yunzai-plugin-deer-pipe
+```
 
+##  🤺 R插件交流群
 
-#### 特技
+<img src="https://s2.loli.net/2024/08/12/8zhnvBCj5SgxukK.jpg" style="zoom: 33%;" >
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+>  扫码不行就输入：575663150
+
+## 🔗 相关链接
+
+- 喵崽：[Yoimiya / Miao-Yunzai](https://gitee.com/yoimiya-kokomi/Miao-Yunzai)
+- TRSS：[时雨◎星空 / Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
+- 听语惊花：[听语惊花 / Yunzai-Bot-lite](https://gitee.com/Nwflower/yunzai-bot-lite)
+- [插件库](https://gitee.com/yhArcadia/Yunzai-Bot-plugins-index)
+- [锅巴插件](https://gitee.com/guoba-yunzai/guoba-plugin)
+- [nonebot-plugin-deer-pipe](https://github.com/SamuNatsu/nonebot-plugin-deer-pipe)
+
+## 🚀 声明
+
+* 文件借鉴了很多插件，精简个人认为可以精简的内容。
+* 素材来源于网络，仅供交流学习使用
+* 严禁用于任何商业用途和非法行为
+* 如果对你有帮助辛苦给个star，这是对我最大的鼓励

@@ -1,0 +1,7 @@
+- {
+  version: 0.0.1,
+  data:
+    [
+      第一次<span class="cmd">初始化</span>仓库,
+    ],
+}
