@@ -31,7 +31,8 @@ _✨ 每月🦌管签到 ✨_
 ```shell
 # 国内
 git clone https://gitee.com/kyrzy0416/yunzai-plugin-deer-pipe.git ./plugins/yunzai-plugin-deer-pipe/
-# 海外 @todo
+# 海外 
+git clone https://github.com/zhiyu1998/yunzai-plugin-deer-pipe.git ./plugins/yunzai-plugin-deer-pipe/
 ```
 
 2. 安装依赖

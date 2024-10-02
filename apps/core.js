@@ -26,7 +26,7 @@ export class DeerPipe extends plugin {
      * 获取某个用户的签到数据
      * @param user_id
      * @param day
-     * @returns {Promise<*>}
+     * @returns {Promise<number>}
      */
     async getSignData(user_id, day) {
         const deerData = await redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE) || {};
@@ -92,7 +92,7 @@ export class DeerPipe extends plugin {
         const day = date.getDate();
         const signData = await this.sign(user_id, day);
         const raw = await generateImage(date, nickname, signData[user_id]);
-        await e.reply(segment.image(raw));
+        await e.reply(["成功🦌了", segment.image(raw)], true);
     }
 
     async makeupLu(e) {
@@ -118,6 +118,6 @@ export class DeerPipe extends plugin {
         if (signData[user_id][day] === beforeSignData) {
             sendText = "只能补🦌没有🦌的日子捏";
         }
-        await e.reply([sendText, segment.image(raw)]);
+        await e.reply([sendText, segment.image(raw)], true);
     }
 }
