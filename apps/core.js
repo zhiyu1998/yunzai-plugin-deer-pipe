@@ -114,7 +114,7 @@ export class DeerPipe extends plugin {
         const date = new Date();
         const nowDay = date.getDate();
         // 如果超过日子就不理
-        if (day > nowDay) {
+        if (day > nowDay || day === 0) {
             logger.info("[鹿] 超过当前日期");
             return;
         }
@@ -147,7 +147,7 @@ export class DeerPipe extends plugin {
         }
 
         // 如果超过日子就不理
-        if (day > nowDay) {
+        if (day > nowDay || day === 0) {
             logger.info("[鹿] 超过当前日期");
             return;
         }
