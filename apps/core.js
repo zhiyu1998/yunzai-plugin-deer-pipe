@@ -17,6 +17,10 @@ export class DeerPipe extends plugin {
                 {
                     reg: "^补(🦌|鹿)[0-9]+$",
                     fnc: "makeupLu",
+                },
+                {
+                    reg: "^戒(🦌|鹿)[0-9]*$",
+                    fnc: "withdrawalLu",
                 }
             ]
         })
@@ -38,9 +42,10 @@ export class DeerPipe extends plugin {
      * @param user_id   用户ID，QQ号一般是
      * @param day       当天日期
      * @param isMakeup  是否补签
+     * @param isWithdrawal 是否是戒🦌
      * @returns {Promise<Object>}
      */
-    async sign(user_id, day, isMakeup = false) {
+    async sign(user_id, day, isMakeup = false, isWithdrawal = false) {
         const userId = parseInt(user_id);
         const signDay = parseInt(day);
 
@@ -63,15 +68,25 @@ export class DeerPipe extends plugin {
 
         // 检查签到天数
         const dayKey = String(signDay);
-        if (!deerData[userId][dayKey]) {
+        logger.info(`================${deerData[userId][dayKey]}`)
+        if (deerData[userId][dayKey] === undefined) {
             // 如果没有签到记录，则设置为1
             deerData[userId][dayKey] = 1;
         } else {
-            // 如果有签到记录，则检查是否补签
-            if (isMakeup) {
+            if (isMakeup && !isWithdrawal) {
+                // 补签 && 没有戒🦌
                 deerData[userId][dayKey] = 1; // 如果是补签，减1
-            } else {
+            } else if (!isMakeup && !isWithdrawal) {
+                // 没有补签 && 没有戒🦌
                 deerData[userId][dayKey] += 1; // 如果有签到记录，则加1
+            } else if (isMakeup && isWithdrawal) {
+                // 补签 && 戒🦌
+                deerData[userId][dayKey] = 0; // 如果是补签，减1
+            } else if (!isMakeup && isWithdrawal) {
+                // 没有补签 && 戒🦌
+                if (deerData[userId][dayKey] > 0) {
+                    deerData[userId][dayKey] -= 1; // 如果有签到记录，则加1
+                }
             }
         }
 
@@ -119,5 +134,29 @@ export class DeerPipe extends plugin {
             sendText = "只能补🦌没有🦌的日子捏";
         }
         await e.reply([sendText, segment.image(raw)], true);
+    }
+
+    async withdrawalLu(e) {
+        let day = /\d/.exec(e.msg.trim())?.join([0]);
+        const date = new Date();
+        const nowDay = date.getDate();
+        // 如果不存在数字，那么就是当天
+        if (day) {
+            day = parseInt(day);
+        } else {
+            day = nowDay;
+        }
+
+        // 如果超过日子就不理
+        if (day > nowDay) {
+            logger.info("[鹿] 超过当前日期");
+            return;
+        }
+
+        const user = e.sender;
+        const { user_id, nickname } = user;
+        const signData = await this.sign(user_id, day, !(day === nowDay), true);
+        const raw = await generateImage(date, nickname, signData[user_id]);
+        await e.reply(["成功戒🦌了", segment.image(raw)], true);
     }
 }
