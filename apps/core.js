@@ -68,7 +68,6 @@ export class DeerPipe extends plugin {
 
         // 检查签到天数
         const dayKey = String(signDay);
-        logger.info(`================${deerData[userId][dayKey]}`)
         if (deerData[userId][dayKey] === undefined) {
             // 如果没有签到记录，则设置为1
             deerData[userId][dayKey] = 1;
