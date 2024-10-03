@@ -46,7 +46,7 @@ apt-get install pkg-config libpixman-1-dev
 apt-get install libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
 ```
 
-##  🤺 R插件交流群
+##  🦌 友交流群
 
 <img src="https://s2.loli.net/2024/08/12/8zhnvBCj5SgxukK.jpg" style="zoom: 33%;" >
 
