@@ -99,13 +99,13 @@ export class DeerPipe extends plugin {
     async lu(e) {
         // 获取用户
         const user = e.sender;
-        const { user_id, nickname } = user;
+        const { user_id, nickname, card } = user;
         // 获取当前日期
         const date = new Date();
         // 获取当前是几号
         const day = date.getDate();
         const signData = await this.sign(user_id, day);
-        const raw = await generateImage(date, nickname, signData[user_id]);
+        const raw = await generateImage(date, card || nickname, signData[user_id]);
         await e.reply(["成功🦌了", segment.image(raw)], true);
     }
 
@@ -120,13 +120,13 @@ export class DeerPipe extends plugin {
         }
 
         const user = e.sender;
-        const { user_id, nickname } = user;
+        const { user_id, nickname, card } = user;
         // 获取用户之前的数据
         const beforeSignData = await this.getSignData(user_id, day);
         // 尝试签到
         const signData = await this.sign(user_id, day, true);
         // 补签多次情况处理
-        const raw = await generateImage(date, nickname, signData[user_id]);
+        const raw = await generateImage(date, card || nickname, signData[user_id]);
         let sendText = "成功补🦌";
         // 如果补签后和之前的数据一致，则不允许补签
         if (signData[user_id][day] === beforeSignData) {
@@ -153,9 +153,9 @@ export class DeerPipe extends plugin {
         }
 
         const user = e.sender;
-        const { user_id, nickname } = user;
+        const { user_id, nickname, card } = user;
         const signData = await this.sign(user_id, day, !(day === nowDay), true);
-        const raw = await generateImage(date, nickname, signData[user_id]);
+        const raw = await generateImage(date, card || nickname, signData[user_id]);
         await e.reply(["成功戒🦌了", segment.image(raw)], true);
     }
 }
