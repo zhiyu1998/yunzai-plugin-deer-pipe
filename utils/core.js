@@ -1,10 +1,6 @@
-import { createCanvas, loadImage, registerFont } from 'canvas';
-import crypto from 'crypto';
+import sharp from 'sharp';
 import fs from 'fs';
-import path from 'path';
-import { CHECK_IMG, DEERPIPE_IMG, MISANS_FONT, PLUGIN_PATH } from '../constants/core.js';
-
-registerFont(MISANS_FONT, { family: 'MiSans' });
+import { CHECK_IMG, DEERPIPE_IMG } from '../constants/core.js';
 
 function getMonthCalendar(now) {
     const year = now.getFullYear();
@@ -55,62 +51,102 @@ export async function generateImage(now, name, deer) {
     const cal = getMonthCalendar(now);
 
     const IMG_W = 700;
-    const IMG_H = 100 * (cal.length + 1); // 根据周数动态调整图片高度
     const BOX_W = 100;
     const BOX_H = 100;
+    const IMG_H = BOX_H * (cal.length + 1);
 
-    const canvas = createCanvas(IMG_W, IMG_H);
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, IMG_W, IMG_H);
+    // 创建一个空白的图像作为背景
+    let compositeArray = [{
+        input: {
+            create: {
+                width: IMG_W,
+                height: IMG_H,
+                channels: 4,
+                background: { r: 255, g: 255, b: 255, alpha: 1 }
+            }
+        }
+    }];
 
-    // 异步加载图像
-    const deerpipeImage = await loadImage(DEERPIPE_IMG);
-    const checkImage = await loadImage(CHECK_IMG);
+    // 加载需要的图像资源
+    const deerpipeBuffer = fs.readFileSync(DEERPIPE_IMG);
+    const checkBuffer = fs.readFileSync(CHECK_IMG);
 
+    // 遍历日历，构建 composite 数组
     for (let weekIdx = 0; weekIdx < cal.length; weekIdx++) {
         for (let dayIdx = 0; dayIdx < cal[weekIdx].length; dayIdx++) {
             const day = cal[weekIdx][dayIdx];
             const x0 = dayIdx * BOX_W;
             const y0 = (weekIdx + 1) * BOX_H;
-            if (day !== null) { // 只绘制不为 null 的日期
-                // 绘制日历格子和图像
-                ctx.drawImage(deerpipeImage, x0, y0);
-                ctx.fillStyle = 'black';
-                ctx.font = '30px MiSans';
-                ctx.fillText(day.toString(), x0 + 5, y0 + BOX_H - 35);
+            if (day !== null) {
+                // 底图
+                compositeArray.push({
+                    input: deerpipeBuffer,
+                    top: y0,
+                    left: x0
+                });
 
-                // 检查该天是否签到
+                // 日期数字
+                compositeArray.push({
+                    input: Buffer.from(
+                        `<svg width="${BOX_W}" height="${BOX_H}">
+                            <text x="5" y="${BOX_H - 35}" font-size="30" font-family="MiSans" fill="black">${day}</text>
+                        </svg>`
+                    ),
+                    top: y0,
+                    left: x0
+                });
+
+                // 签到标记
                 if (deer[day]) {
-                    ctx.drawImage(checkImage, x0, y0);
+                    compositeArray.push({
+                        input: checkBuffer,
+                        top: y0,
+                        left: x0
+                    });
+
+                    // 签到次数
                     if (deer[day] > 1) {
-                        const txt = deer[day] > 99 ? 'x99+' : `x${ deer[day] }`;
-                        const tlen = ctx.measureText(txt).width;
-                        ctx.font = 'bold 30px MiSans'; // 加粗字体
-                        ctx.fillStyle = 'red';
-                        ctx.fillText(txt, x0 + BOX_W - tlen - 5, y0 + BOX_H - 20);
+                        const txt = deer[day] > 99 ? 'x99+' : `x${deer[day]}`;
+                        compositeArray.push({
+                            input: Buffer.from(
+                                `<svg width="${BOX_W}" height="${BOX_H}">
+                                    <text x="${BOX_W - 5}" y="${BOX_H - 20}" font-size="30" font-family="MiSans" fill="red" text-anchor="end" font-weight="bold">${txt}</text>
+                                </svg>`
+                            ),
+                            top: y0,
+                            left: x0
+                        });
                     }
                 }
             }
         }
     }
 
+    // 添加标题和用户名
+    compositeArray.push({
+        input: Buffer.from(
+            `<svg width="${IMG_W}" height="${BOX_H}">
+                <text x="5" y="35" font-size="30" font-family="MiSans" fill="black">${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')} 签到</text>
+                <text x="5" y="85" font-size="30" font-family="MiSans" fill="black">${name}</text>
+            </svg>`
+        ),
+        top: 0,
+        left: 0
+    });
 
-    // 设置签名的字体大小并显示
-    ctx.font = '30px MiSans';
-    ctx.fillText(`${ now.getFullYear() }-${ String(now.getMonth() + 1).padStart(2, '0') } 签到`, 5, 35);
+    const imgBuffer = await sharp({
+        create: {
+            width: IMG_W,
+            height: IMG_H,
+            channels: 4,
+            background: { r: 255, g: 255, b: 255, alpha: 1 }
+        }
+    })
+        .composite(compositeArray)
+        .png()
+        .toBuffer();
 
-    ctx.font = '30px MiSans'; // 名字的字体可以更大一些
-    ctx.fillText(name, 5, 85);
-
-    const imgPath = path.join(PLUGIN_PATH, `${ crypto.randomBytes(16).toString('hex') }.png`);
-    const buffer = canvas.toBuffer('image/png');
-    fs.writeFileSync(imgPath, buffer);
-
-    const raw = fs.readFileSync(imgPath);
-    fs.unlinkSync(imgPath);
-
-    return raw;
+    return imgBuffer;
 }
 
 
