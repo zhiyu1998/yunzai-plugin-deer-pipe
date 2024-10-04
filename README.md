@@ -42,6 +42,11 @@ git clone https://github.com/zhiyu1998/yunzai-plugin-deer-pipe.git ./plugins/yun
 pnpm i --filter=yunzai-plugin-deer-pipe
 ```
 
+升级插件，发送以下到群：
+```shell
+#更新yunzai-plugin-deer-pipe
+```
+
 ##  🦌 友交流群
 
 <img src="https://s2.loli.net/2024/08/12/8zhnvBCj5SgxukK.jpg" style="zoom: 33%;" >
