@@ -7,12 +7,13 @@ export default class Leaderboard extends Base {
     }
 
     /** 生成版本信息图片 */
-    async getData (rankData) {
+    async getData (rankData, deerTitle = "鹿管") {
         const curMonth = new Date().getMonth() + 1;
         return {
             ...this.screenData,
             saveId: 'leaderboard',
             rankData: rankData,
+            deerTitle: deerTitle,
             curMonth: curMonth
         }
     }

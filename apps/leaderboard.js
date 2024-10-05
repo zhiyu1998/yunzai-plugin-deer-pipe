@@ -12,23 +12,30 @@ export class LeaderboardApp extends plugin {
             priority: 5000,
             rule: [
                 {
-                    reg: "^(🦌|鹿)榜$",
+                    reg: "^(🦌|鹿|戒🦌|戒鹿)榜$",
                     fnc: "leaderboard",
                 }
             ]
         })
     }
 
-    getRankData(deerData, members) {
-        return Object.keys(deerData)
+    getRankData(deerData, members, order = "desc") {
+        const rankData = Object.keys(deerData)
             .filter(deer => members.includes(parseInt(deer)))
             .map(deer => {
                 const sum = Object.keys(deerData[deer])
                     .filter(subKey => !isNaN(subKey))
                     .reduce((acc, subKey) => acc + deerData[deer][subKey], 0);
                 return { id: deer, sum: sum };
-            })
-            .sort((a, b) => b.sum - a.sum);
+            });
+
+        // 根据order参数排序
+        if (order === "asc") {
+            rankData.sort((a, b) => a.sum - b.sum);
+        } else {
+            rankData.sort((a, b) => b.sum - a.sum);
+        }
+        return rankData;
     }
 
     async leaderboard(e) {
@@ -42,8 +49,9 @@ export class LeaderboardApp extends plugin {
             return;
         }
 
+        const isWithdrawal = e.msg.includes("戒");
         // 计算rankData
-        const rankData = this.getRankData(deerData, members);
+        const rankData = isWithdrawal ? this.getRankData(deerData, members, "asc") : this.getRankData(deerData, members);
 
         // 获取成员信息并更新rankData
         const membersMap = await Bot.pickGroup(e.group_id).getMemberMap();
@@ -57,7 +65,7 @@ export class LeaderboardApp extends plugin {
         }));
 
         // 传递给html
-        const data = await new Leaderboard(e).getData(rankDataWithMembers);
+        const data = await new Leaderboard(e).getData(rankDataWithMembers, isWithdrawal ? "戒鹿" : "鹿管");
         let img = await puppeteer.screenshot("leaderboard", data);
         e.reply(img);
     }
