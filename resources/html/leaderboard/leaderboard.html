@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鹿管排行榜</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .ranking-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 10px;
+            border-bottom: 1px solid #ecf0f1;
+            transition: background-color 0.3s;
+        }
+        .ranking-item:hover {
+            background-color: #f8f9fa;
+        }
+        .ranking-number {
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 30px;
+            color: #7f8c8d;
+        }
+        .medal {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        .name {
+            flex-grow: 1;
+            font-size: 18px;
+        }
+        .count {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 18px;
+        }
+        .count::after {
+            content: ' 次';
+            font-size: 14px;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🦌 鹿管排行榜 🦌</h1>
+    <ol class="ranking-list">
+        {{each rankData deer}}
+        <li class="ranking-item">
+            <span class="ranking-number">{{deer.order}}</span>
+            {{if deer.order == 1}}
+            <span class="medal">🥇</span>
+            {{/if}}
+            {{if deer.order == 2}}
+            <span class="medal">🥈</span>
+            {{/if}}
+            {{if deer.order == 3}}
+            <span class="medal">🥉</span>
+            {{/if}}
+            <span class="name">{{deer.card}}</span>
+            <span class="count">{{deer.sum}}</span>
+        </li>
+        {{/each}}
+    </ol>
+</div>
+</body>
+</html>
