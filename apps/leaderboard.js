@@ -40,9 +40,10 @@ export class LeaderboardApp extends plugin {
 
     async leaderboard(e) {
         const curGroup = e.group || Bot?.pickGroup(e.group_id);
+        const membersMap = await curGroup?.getMemberMap();
         // 获取群成员和Redis数据并发执行
-        const [members, deerData] = await Promise.all([
-            curGroup?.getMemberList(),
+        let [members, deerData] = await Promise.all([
+            curGroup?.getMemberList() || membersMap,
             redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE)
         ]);
 
@@ -50,12 +51,16 @@ export class LeaderboardApp extends plugin {
             return;
         }
 
+        // 适配icqq
+        if (members instanceof Map) {
+            members = Array.from(members.keys());
+        }
+
         const isWithdrawal = e.msg.includes("戒");
         // 计算rankData
         const rankData = isWithdrawal ? this.getRankData(deerData, members, "asc") : this.getRankData(deerData, members);
 
         // 获取成员信息并更新rankData
-        const membersMap = await curGroup?.getMemberMap();
         const rankDataWithMembers = await Promise.all(rankData.map(async (item, index) => {
             const groupInfo = membersMap.get(parseInt(item.id));
             return {
