@@ -1,7 +1,7 @@
+import puppeteer from "../../../lib/puppeteer/puppeteer.js";
 import { REDIS_YUNZAI_DEER_PIPE } from "../constants/core.js";
 import Leaderboard from "../model/leaderboard.js";
 import { redisExistAndGetKey } from "../utils/redis-util.js";
-import puppeteer from "../../../lib/puppeteer/puppeteer.js";
 
 export class LeaderboardApp extends plugin {
     constructor() {
@@ -19,43 +19,45 @@ export class LeaderboardApp extends plugin {
         })
     }
 
-    async leaderboard(e){
-        // 获取群成员
-        const members = await Bot.pickGroup(e.group_id).getMemberList() || Array.from(e.bot.gml.get(e.group_id).keys());
+    getRankData(deerData, members) {
+        return Object.keys(deerData)
+            .filter(deer => members.includes(parseInt(deer)))
+            .map(deer => {
+                const sum = Object.keys(deerData[deer])
+                    .filter(subKey => !isNaN(subKey))
+                    .reduce((acc, subKey) => acc + deerData[deer][subKey], 0);
+                return { id: deer, sum: sum };
+            })
+            .sort((a, b) => b.sum - a.sum);
+    }
 
-        // 获取数据
-        const deerData = await redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE)
+    async leaderboard(e) {
+        // 获取群成员和Redis数据并发执行
+        const [members, deerData] = await Promise.all([
+            Bot.pickGroup(e.group_id).getMemberList() || Array.from(e.bot.gml.get(e.group_id).keys()),
+            redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE)
+        ]);
+
         if (deerData == null) {
             return;
         }
-        // 创建一个数组来存储ID和累加和的键值对
-        const rankData = [];
-        for (const deer in deerData) {
-            if (members.includes(parseInt(deer))) {
-                let sum = 0;
-                // 遍历每个内层对象的键值
-                for (const subKey in deerData[deer]) {
-                    // 判断是否为数值型的键
-                    if (!isNaN(subKey)) {
-                        sum += deerData[deer][subKey]; // 将数值型键的值累加
-                    }
-                }
 
-                // 将ID和累加和存入数组
-                rankData.push({ id: deer, sum: sum });
-            }
-        }
-        // 按照sum值从高到低排序
-        rankData.sort((a, b) => b.sum - a.sum);
-        // 增加order字段，从1开始
+        // 计算rankData
+        const rankData = this.getRankData(deerData, members);
+
+        // 获取成员信息并更新rankData
         const membersMap = await Bot.pickGroup(e.group_id).getMemberMap();
-        rankData.forEach((item, index) => {
+        const rankDataWithMembers = await Promise.all(rankData.map(async (item, index) => {
             const groupInfo = membersMap.get(parseInt(item.id));
-            item.card = groupInfo.card || groupInfo.nickname;
-            item.order = index + 1; // 第几名
-        });
+            return {
+                ...item,
+                card: groupInfo.card || groupInfo.nickname,
+                order: index + 1
+            };
+        }));
+
         // 传递给html
-        const data = await new Leaderboard(e).getData(rankData);
+        const data = await new Leaderboard(e).getData(rankDataWithMembers);
         let img = await puppeteer.screenshot("leaderboard", data);
         e.reply(img);
     }
