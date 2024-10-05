@@ -39,9 +39,10 @@ export class LeaderboardApp extends plugin {
     }
 
     async leaderboard(e) {
+        const curGroup = e.group || Bot?.pickGroup(e.group_id);
         // 获取群成员和Redis数据并发执行
         const [members, deerData] = await Promise.all([
-            Bot.pickGroup(e.group_id).getMemberList() || Array.from(e.bot.gml.get(e.group_id).keys()),
+            curGroup?.getMemberList(),
             redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE)
         ]);
 
@@ -54,7 +55,7 @@ export class LeaderboardApp extends plugin {
         const rankData = isWithdrawal ? this.getRankData(deerData, members, "asc") : this.getRankData(deerData, members);
 
         // 获取成员信息并更新rankData
-        const membersMap = await Bot.pickGroup(e.group_id).getMemberMap();
+        const membersMap = await curGroup?.getMemberMap();
         const rankDataWithMembers = await Promise.all(rankData.map(async (item, index) => {
             const groupInfo = membersMap.get(parseInt(item.id));
             return {
