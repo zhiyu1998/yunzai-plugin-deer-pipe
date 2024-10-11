@@ -110,7 +110,7 @@ export class DeerPipe extends plugin {
     }
 
     async makeupLu(e) {
-        const day = parseInt(/\d/.exec(e.msg.trim())[0]);
+        const day = parseInt(/\d+/.exec(e.msg.trim())[0]);
         const date = new Date();
         const nowDay = date.getDate();
         // 如果超过日子就不理
