@@ -136,7 +136,7 @@ export class DeerPipe extends plugin {
     }
 
     async withdrawalLu(e) {
-        let day = /\d/.exec(e.msg.trim())?.join([0]);
+        let day = /\d+/.exec(e.msg.trim())?.join([0]);
         const date = new Date();
         const nowDay = date.getDate();
         // 如果不存在数字，那么就是当天
