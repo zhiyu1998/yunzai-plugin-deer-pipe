@@ -33,18 +33,40 @@ export class Friends extends plugin {
      * @param user_id
      * @returns {Promise<*>}
      */
-    async getGroupUserInfo(e, user_id) {
+    async getGroupUserInfo(e) {
         const curGroup = e.group || Bot?.pickGroup(e.group_id);
-        const membersMap = await curGroup?.getMemberMap();
-        if (typeof user_id === "string" || typeof user_id === "number") {
-            const groupInfo = membersMap.get(parseInt(user_id));
-            return groupInfo?.card || groupInfo?.nickname;
-        } else {
-            return Promise.all(user_id.map(async (item, index) => {
-                const groupInfo = membersMap.get(parseInt(item.id));
-                return groupInfo?.card || groupInfo?.nickname;
-            }));
-        }
+        return curGroup?.getMemberMap();
+    }
+
+    /**
+     * 获取群信息
+     * @param whiteList
+     * @param user_id
+     * @param membersMap
+     * @returns {*}
+     */
+    generateDeerData(whiteList, user_id, membersMap) {
+        return whiteList[user_id].filter(item => {
+            const groupInfo = membersMap.get(parseInt(item));
+            return groupInfo !== undefined;
+        }).map(item => {
+            const groupInfo = membersMap.get(parseInt(item));
+            return {
+                user_id: item,
+                nickname: groupInfo?.card || groupInfo?.nickname
+            }
+        });
+    }
+
+    /**
+     * 从群信息中提取某个用户的昵称
+     * @param membersMap
+     * @param deerTrustUserId
+     * @returns {*}
+     */
+    extractDeerNickname(membersMap, deerTrustUserId) {
+        const trustDeerInfo = membersMap.get(parseInt(deerTrustUserId));
+        return trustDeerInfo?.nickname || trustDeerInfo?.card || deerTrustUserId;
     }
 
 
@@ -81,8 +103,18 @@ export class Friends extends plugin {
         // 放置到Redis里
         await redisSetKey(REDIS_YUNZAI_DEER_PIPE_FRIENDS, whiteList);
         // 获取🦌友信息
-        const trustDeer = await this.getGroupUserInfo(e, deerTrustUserId);
-        e.reply(`${ card || nickname }成功交到🦌友：${ trustDeer }`, true);
+        const membersMap = await this.getGroupUserInfo(e);
+        // 生成我的🦌友图片
+        const deerData = this.generateDeerData(whiteList, user_id, membersMap);
+        if (deerData.length === 0) {
+            e.reply("暂时没有🦌友！", true);
+            return;
+        }
+        const data = await new FriendsModel(e).getData(deerData, nickname);
+        let img = await puppeteer.screenshot("friends", data);
+        // 获取🦌友信息
+        const trustDeer = this.extractDeerNickname(membersMap, deerTrustUserId);
+        e.reply([`${ card || nickname }成功交到🦌友：${ trustDeer }`, img], true);
     }
 
     async delDeerFriend(e) {
@@ -118,8 +150,18 @@ export class Friends extends plugin {
         // 放置到Redis里
         await redisSetKey(REDIS_YUNZAI_DEER_PIPE_FRIENDS, whiteList);
         // 获取🦌友信息
-        const trustDeer = await this.getGroupUserInfo(e, deerTrustUserId);
-        e.reply(`${ card || nickname }成功绝交🦌友：${ trustDeer }`, true);
+        const membersMap = await this.getGroupUserInfo(e);
+        // 生成我的🦌友图片
+        const deerData = this.generateDeerData(whiteList, user_id, membersMap);
+        if (deerData.length === 0) {
+            e.reply("暂时没有🦌友！", true);
+            return;
+        }
+        const data = await new FriendsModel(e).getData(deerData, nickname);
+        let img = await puppeteer.screenshot("friends", data);
+        // 获取🦌友信息
+        const trustDeer = this.extractDeerNickname(membersMap, deerTrustUserId);
+        e.reply([`${ card || nickname }成功绝交🦌友：${ trustDeer }`, img], true);
     }
 
     async myDeerFriend(e) {
@@ -134,16 +176,7 @@ export class Friends extends plugin {
         }
         const curGroup = e.group || Bot?.pickGroup(e.group_id);
         const membersMap = await curGroup?.getMemberMap();
-        const deerData = whiteList[user_id].filter(item => {
-            const groupInfo = membersMap.get(parseInt(item));
-            return groupInfo !== undefined;
-        }).map(item => {
-            const groupInfo = membersMap.get(parseInt(item));
-            return {
-                user_id: item,
-                nickname: groupInfo?.card || groupInfo?.nickname
-            }
-        })
+        const deerData = this.generateDeerData(whiteList, user_id, membersMap);
         if (deerData.length === 0) {
             e.reply("暂时没有🦌友！", true);
             return;

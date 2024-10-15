@@ -219,8 +219,9 @@ export class DeerPipe extends plugin {
         const curGroup = e.group || Bot?.pickGroup(e.group_id);
         const membersMap = await curGroup?.getMemberMap();
         const groupInfo = membersMap.get(parseInt(deerTrustUserId));
+        const helpTargetUserName = groupInfo?.card || groupInfo?.nickname;
         // 生成图片
-        const raw = await generateImage(date, groupInfo?.card || groupInfo?.nickname, signData[deerTrustUserId]);
-        await e.reply([`${card || nickname}成功帮助🦌友 ${groupInfo?.card || groupInfo?.nickname} 🦌了一发`, segment.image(raw)], true);
+        const raw = await generateImage(date, helpTargetUserName, signData[deerTrustUserId]);
+        await e.reply([`${card || nickname}成功帮助🦌友 ${helpTargetUserName} 🦌了一发`, segment.image(raw)], true);
     }
 }
