@@ -220,6 +220,6 @@ export class DeerPipe extends plugin {
         const curGroup = e.group || Bot?.pickGroup(e.group_id);
         const membersMap = await curGroup?.getMemberMap();
         const groupInfo = membersMap.get(parseInt(deerTrustUserId));
-        await e.reply([`${card || nickname}成功帮助它的🦌友 ${groupInfo?.card || groupInfo?.nickname} 🦌了一发`, segment.image(raw)], true);
+        await e.reply([`${card || nickname}成功帮助🦌友 ${groupInfo?.card || groupInfo?.nickname} 🦌了一发`, segment.image(raw)], true);
     }
 }

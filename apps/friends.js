@@ -129,7 +129,7 @@ export class Friends extends plugin {
         // 获取🦌友
         let whiteList = await redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE_FRIENDS) || {};
         if (whiteList[user_id] === undefined || whiteList[user_id].length === 0) {
-            e.reply("你还要没有🦌友呢！", true);
+            e.reply("你还没有🦌友呢！", true);
             return;
         }
         const curGroup = e.group || Bot?.pickGroup(e.group_id);
