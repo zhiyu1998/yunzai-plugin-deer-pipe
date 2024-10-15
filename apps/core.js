@@ -179,7 +179,7 @@ export class DeerPipe extends plugin {
             return;
         }
         const raw = await generateImage(date, card || nickname, signData[user_id]);
-        await e.reply(["成功🦌了", segment.image(raw)], true);
+        await e.reply(["🦌面板如下：", segment.image(raw)], true);
     }
 
     async helpLu(e) {
