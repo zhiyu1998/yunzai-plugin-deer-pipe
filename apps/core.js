@@ -1,4 +1,4 @@
-import { REDIS_YUNZAI_DEER_PIPE } from "../constants/core.js";
+import { REDIS_YUNZAI_DEER_PIPE, REDIS_YUNZAI_DEER_PIPE_FRIENDS } from "../constants/core.js";
 import { generateImage } from "../utils/core.js";
 import { redisExistAndGetKey, redisSetKey } from "../utils/redis-util.js";
 
@@ -21,6 +21,14 @@ export class DeerPipe extends plugin {
                 {
                     reg: "^戒(🦌|鹿)[0-9]*$",
                     fnc: "withdrawalLu",
+                },
+                {
+                    reg: "^看(🦌|鹿)$",
+                    fnc: "viewLu",
+                },
+                {
+                    reg: "^帮(🦌|鹿)(.*)",
+                    fnc: "helpLu",
                 }
             ]
         })
@@ -157,5 +165,61 @@ export class DeerPipe extends plugin {
         const signData = await this.sign(user_id, day, !(day === nowDay), true);
         const raw = await generateImage(date, card || nickname, signData[user_id]);
         await e.reply(["成功戒🦌了", segment.image(raw)], true);
+    }
+
+    async viewLu(e) {
+        // 获取用户
+        const user = e.sender;
+        const { user_id, nickname, card } = user;
+        // 获取当前日期
+        const date = new Date();
+        const signData = await redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE) || {};
+        if (!signData[user_id]) {
+            e.reply("你还没有🦌过呢~", true);
+            return;
+        }
+        const raw = await generateImage(date, card || nickname, signData[user_id]);
+        await e.reply(["成功🦌了", segment.image(raw)], true);
+    }
+
+    async helpLu(e) {
+        // 获取用户
+        const user = e.sender;
+        const { user_id, nickname, card } = user;
+        let deerTrustUserId = null;
+        // 获取🦌友
+        if (e.at) {
+            // 通过 at 添加
+            deerTrustUserId = e.at;
+        } else {
+            deerTrustUserId = e?.reply_id !== undefined ?
+                (await e.getReply()).user_id :
+                e.msg.replace(/帮(🦌|鹿)/g, "").trim();
+        }
+        if (!deerTrustUserId) {
+            e.reply("无法获取到🦌友信息，或者这是一个无效的🦌信息，请重试", true);
+            return;
+        }
+        let whiteList = await redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE_FRIENDS) || {};
+        // 第一次初始化
+        if (whiteList[deerTrustUserId] === undefined) {
+            whiteList[deerTrustUserId] = [];
+        }
+        // 检测指定🦌友是否包含当前发送用户
+        if (!whiteList[deerTrustUserId].includes(user_id.toString())) {
+            e.reply("ta 不是你的🦌友哦！\n可以让 ta 通过 `添加🦌友` 命令添加到你为 ta 的🦌友哦！", true);
+            return;
+        }
+        // 获取当前日期
+        const date = new Date();
+        // 获取当前是几号
+        const day = date.getDate();
+        const signData = await this.sign(deerTrustUserId, day);
+        const raw = await generateImage(date, card || nickname, signData[deerTrustUserId]);
+        // 获取群信息
+        const curGroup = e.group || Bot?.pickGroup(e.group_id);
+        const membersMap = await curGroup?.getMemberMap();
+        const groupInfo = membersMap.get(parseInt(deerTrustUserId));
+        await e.reply([`${card || nickname}成功帮助它的🦌友 ${groupInfo?.card || groupInfo?.nickname} 🦌了一发`, segment.image(raw)], true);
     }
 }
