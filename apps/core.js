@@ -215,11 +215,12 @@ export class DeerPipe extends plugin {
         // 获取当前是几号
         const day = date.getDate();
         const signData = await this.sign(deerTrustUserId, day);
-        const raw = await generateImage(date, card || nickname, signData[deerTrustUserId]);
         // 获取群信息
         const curGroup = e.group || Bot?.pickGroup(e.group_id);
         const membersMap = await curGroup?.getMemberMap();
         const groupInfo = membersMap.get(parseInt(deerTrustUserId));
+        // 生成图片
+        const raw = await generateImage(date, groupInfo?.card || groupInfo?.nickname, signData[deerTrustUserId]);
         await e.reply([`${card || nickname}成功帮助🦌友 ${groupInfo?.card || groupInfo?.nickname} 🦌了一发`, segment.image(raw)], true);
     }
 }
