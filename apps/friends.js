@@ -181,7 +181,7 @@ export class Friends extends plugin {
             e.reply("暂时没有🦌友！", true);
             return;
         }
-        const data = await new FriendsModel(e).getData(deerData, nickname);
+        const data = await new FriendsModel(e).getData(deerData, card || nickname);
         let img = await puppeteer.screenshot("friends", data);
         e.reply(img);
     }
