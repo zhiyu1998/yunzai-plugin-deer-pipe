@@ -1,6 +1,7 @@
 import puppeteer from "../../../lib/puppeteer/puppeteer.js";
 import { REDIS_YUNZAI_DEER_PIPE_FRIENDS } from "../constants/core.js";
 import FriendsModel from "../model/friends.js";
+import { isNumeric } from "../utils/common.js";
 import { redisExistAndGetKey, redisSetKey } from "../utils/redis-util.js";
 
 export class Friends extends plugin {
@@ -85,7 +86,7 @@ export class Friends extends plugin {
                 e.msg.replace(/添加(🦌|鹿)友/g, "").trim();
         }
         // 判断是否存在
-        if (!deerTrustUserId) {
+        if (!deerTrustUserId || !isNumeric(deerTrustUserId)) {
             e.reply("无法获取到🦌友信息，或者这是一个无效的🦌信息，请重试", true);
             return;
         }
@@ -131,7 +132,7 @@ export class Friends extends plugin {
                 (await e.getReply()).user_id :
                 e.msg.replace(/绝交(🦌|鹿)友/g, "").trim();
         }
-        if (!deerTrustUserId) {
+        if (!deerTrustUserId || !isNumeric(deerTrustUserId)) {
             e.reply("无法获取到🦌友信息，或者这是一个无效的🦌信息，请重试", true);
             return;
         }
