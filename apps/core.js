@@ -206,7 +206,7 @@ export class DeerPipe extends plugin {
             whiteList[deerTrustUserId] = [];
         }
         // 检测指定🦌友是否包含当前发送用户
-        if (!whiteList[deerTrustUserId].includes(user_id.toString())) {
+        if (!String(whiteList[deerTrustUserId]).includes(user_id.toString())) {
             e.reply("ta 不是你的🦌友哦！\n可以让 ta 通过 `添加🦌友` 命令添加到你为 ta 的🦌友哦！", true);
             return;
         }
