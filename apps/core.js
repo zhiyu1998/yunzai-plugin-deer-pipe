@@ -77,8 +77,13 @@ export class DeerPipe extends plugin {
         // 检查签到天数
         const dayKey = String(signDay);
         if (deerData[userId][dayKey] === undefined) {
-            // 如果没有签到记录，则设置为1
-            deerData[userId][dayKey] = 1;
+            if (isWithdrawal) {
+                // 如果没有签到数据 && 是第一次戒🦌，进行初始化
+                deerData[userId][dayKey] = 0;
+            } else {
+                // 如果没有签到记录，则设置为1
+                deerData[userId][dayKey] = 1;
+            }
         } else {
             if (isMakeup && !isWithdrawal) {
                 // 补签 && 没有戒🦌
