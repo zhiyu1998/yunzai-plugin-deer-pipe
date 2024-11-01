@@ -1,7 +1,11 @@
 - {
-  version: 0.0.1,
+  version: 1.2.7,
   data:
     [
-      第一次<span class="cmd">初始化</span>仓库,
+      修复<span class="cmd">换月后🦌榜没有更新</span>问题,
+      修复<span class="cmd">没有鹿的日期可以通过戒鹿来鹿</span>问题,
+      修复<span class="cmd">增删🦌友出现文字入库</span>问题,
+      修复<span class="cmd">我的🦌友优先使用群昵称</span>问题,
+      增加<span class="cmd">🦌友后显示图片</span>特征,
     ],
 }
