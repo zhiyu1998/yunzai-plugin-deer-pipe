@@ -24,7 +24,7 @@ export class LeaderboardApp extends plugin {
         const curMonth = new Date().getMonth() + 1;
         // 过滤出本群有的成员 && 本月有签到
         const rankData = Object.keys(deerData)
-            .filter(deer => members.includes(parseInt(deer)) && deer.lastSignMonth === curMonth)
+            .filter(deer => members.includes(parseInt(deer)) && deerData[deer].lastSignMonth === curMonth)
             .map(deer => {
                 const sum = Object.keys(deerData[deer])
                     .filter(subKey => !isNaN(subKey))
