@@ -27,7 +27,7 @@ export class DeerPipe extends plugin {
                     fnc: "viewLu",
                 },
                 {
-                    reg: "^帮(🦌|鹿)(.*)",
+                    reg: "^帮(🦌|鹿)",
                     fnc: "helpLu",
                 }
             ]
@@ -174,13 +174,32 @@ export class DeerPipe extends plugin {
 
     async viewLu(e) {
         // 获取用户
-        const user = e.sender;
+        let user, isAt = false;
+        if (e.at) {
+            // 通过 at 添加
+            const curGroup = e.group || Bot?.pickGroup(e.group_id);
+            const membersMap = await curGroup?.getMemberMap();
+            user = membersMap.get(parseInt(e.at));
+            isAt = true;
+        } else {
+            user = e.sender;
+        }
+        // user_id type: string
         const { user_id, nickname, card } = user;
         // 获取当前日期
         const date = new Date();
+        // 获取全部签到数据
         const signData = await redisExistAndGetKey(REDIS_YUNZAI_DEER_PIPE) || {};
-        if (!signData[user_id]) {
-            e.reply("你还没有🦌过呢~", true);
+        // 获取月份
+        const curMonth = date.getMonth() + 1;
+        logger.info(signData[user_id]);
+        // 判断当前用户是否存在签到数据
+        if (!signData[user_id] || signData[user_id].lastSignMonth !== curMonth) {
+            if (isAt) {
+                e.reply("ta本月还没有🦌过呢~", true);
+            } else {
+                e.reply("你本月还没有🦌过呢~", true);
+            }
             return;
         }
         const raw = await generateImage(date, card || nickname, signData[user_id]);
